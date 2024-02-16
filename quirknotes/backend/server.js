@@ -27,15 +27,15 @@ connectToMongo();
 
 // Open Port
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 
 app.use(cors());
 
 // Collections to manage
 const COLLECTIONS = {
-    notes: "notes",
-  };
+  notes: "notes",
+};
 
 
 // Get all notes available
@@ -44,12 +44,12 @@ app.get("/getAllNotes", express.json(), async (req, res) => {
     // Find notes with username attached to them
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.find().toArray();
-    res.json({ response: data });
+    res.status(200).json({ response: data });
   } catch (error) {
-    res.status(500).json({error: error.message})
+    res.status(500).json({ error: error.message })
   }
 })
-  
+
 // Post a note
 app.post("/postNote", express.json(), async (req, res) => {
   try {
@@ -70,7 +70,7 @@ app.post("/postNote", express.json(), async (req, res) => {
       content,
       createdAt
     });
-    res.json({
+    res.status(200).json({
       response: "Note added succesfully.",
       insertedId: result.insertedId,
     });
@@ -101,12 +101,12 @@ app.delete("/deleteNote/:noteId", express.json(), async (req, res) => {
         .status(404)
         .json({ error: "Unable to find note with given ID." });
     }
-    res.json({ response: `Document with ID ${noteId} deleted.` });
+    res.status(200).json({ response: `Document with ID ${noteId} deleted.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 })
-  
+
 // Patch a note
 app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
   try {
@@ -124,15 +124,15 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
         .json({ error: "Must have at least one of title or content." });
     }
 
-    
+
     // Find note with given ID
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.updateOne({
       _id: new ObjectId(noteId),
     }, {
       $set: {
-        ...(title && {title}),
-        ...(content && {content})
+        ...(title && { title }),
+        ...(content && { content })
       }
     });
 
@@ -141,9 +141,9 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
         .status(404)
         .json({ error: "Unable to find note with given ID." });
     }
-    res.json({ response: `Document with ID ${noteId} patched.` });
+    res.status(200).json({ response: `Document with ID ${noteId} patched.` });
   } catch (error) {
-    res.status(500).json({error: error.message})
+    res.status(500).json({ error: error.message })
   }
 })
 
@@ -152,7 +152,7 @@ app.delete("/deleteAllNotes", express.json(), async (req, res) => {
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.deleteMany({});
 
-    res.json({ response: `${data.deletedCount} note(s) deleted.` });
+    res.status(200).json({ response: `${data.deletedCount} note(s) deleted.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -164,14 +164,14 @@ app.patch('/updateNoteColor/:noteId', express.json(), async (req, res) => {
   const { color } = req.body;
 
   if (!ObjectId.isValid(noteId)) {
-      return res.status(400).json({ error: "Invalid note ID." });
+    return res.status(400).json({ error: "Invalid note ID." });
   }
 
   try {
-      const collection = db.collection('notes');
-      await collection.updateOne({ _id: new ObjectId(noteId) }, { $set: { color } });
-      res.json({ message: 'Note color updated successfully.' });
+    const collection = db.collection('notes');
+    await collection.updateOne({ _id: new ObjectId(noteId) }, { $set: { color } });
+    res.status(200).json({ message: 'Note color updated successfully.' });
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
